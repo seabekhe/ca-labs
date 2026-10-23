@@ -1,26 +1,38 @@
-# Customer Analytics Labs
+# ca-labs
 
-This repository contains reusable Databricks components for the Customer Analytics Advanced Deep Dive session.
+A small Declarative Automation Bundle used in a hands-on Databricks training session: one Lakeflow Spark Declarative
+Pipeline and one Lakeflow Job, deployed into whatever catalog and schema you pass in. All data used in the session is
+synthetic.
 
-## Contents
+```
+bundle/
+  databricks.yml           the pipeline and job, with dev and prod targets
+  src/account_summary.sql  the pipeline: a materialized view of accounts by type, operating company, and status
+```
 
-- **bundles/**: Sample Declarative Automation Bundle configurations for deployment
-- **notebooks/**: Helper transformations and utilities
-- **examples/**: Reference SQL queries and patterns
+## Use it in Databricks (pull only)
 
-## Quick Start
+1. In your workspace: **Workspace → Create → Git folder**, and paste `https://github.com/seabekhe/ca-labs`.
+   Public repository, so no Git credential is needed.
+2. Create a branch from the Git folder's branch selector if you want to experiment.
+3. The training notebook deploys `bundle/` from your Git folder with the Databricks CLI
+   (`bundle validate`, `deploy -t dev`, `run`), passing your catalog, schema, and suffix as variables.
 
-1. Clone this repository into your Databricks workspace (Git Folder)
-2. Follow Lab 1A instructions to create a feature branch
-3. Use Genie Code to generate transformations
-4. Commit and open a pull request
+Participants pull from this repository; pushing and pull requests are demonstrated by the instructor.
 
-## Documentation
+## The variables
 
-- [Declarative Automation Bundles](https://learn.microsoft.com/en-us/azure/databricks/workflows/bundle-configuration/)
-- [Git Folders](https://learn.microsoft.com/en-us/azure/databricks/repos/)
-- [Databricks documentation](https://learn.microsoft.com/en-us/azure/databricks/)
+| Variable | Meaning |
+|---|---|
+| `catalog` | Unity Catalog catalog to deploy into (required) |
+| `schema` | Schema to deploy into (required) |
+| `suffix` | Your suffix, so objects don't collide with other participants (required) |
 
-## License
+Example: `databricks bundle deploy -t dev --var catalog=<catalog> --var schema=<schema> --var suffix=<you>`
 
-This repository is provided as-is for training purposes.
+## Docs
+
+- [Declarative Automation Bundles](https://learn.microsoft.com/en-us/azure/databricks/dev-tools/bundles/)
+- [Bundle variables](https://learn.microsoft.com/en-us/azure/databricks/dev-tools/bundles/variables)
+- [Git folders](https://learn.microsoft.com/en-us/azure/databricks/repos/)
+- [Lakeflow Spark Declarative Pipelines](https://learn.microsoft.com/en-us/azure/databricks/ldp/)

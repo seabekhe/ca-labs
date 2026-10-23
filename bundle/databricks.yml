@@ -1,0 +1,53 @@
+# A small bundle: one pipeline and one job, deployed into whatever catalog/schema you pass in.
+# The same files deploy to dev or prod; only the target and the variables change, never the code.
+# Docs: https://learn.microsoft.com/en-us/azure/databricks/dev-tools/bundles/
+bundle:
+  name: ca-account-summary
+
+variables:
+  catalog:
+    description: Unity Catalog catalog to deploy into (required)
+  schema:
+    description: Schema to deploy into (required)
+  suffix:
+    description: Your suffix, so objects don't collide with other participants (required)
+
+resources:
+  pipelines:
+    account_summary:
+      name: ca-${var.suffix}-bundle-pipeline
+      catalog: ${var.catalog}
+      schema: ${var.schema}
+      serverless: true
+      channel: CURRENT
+      root_path: ./src
+      libraries:
+        - glob:
+            include: ./src/**
+      configuration:
+        suffix: ${var.suffix}
+      tags:
+        workshop: ca-advanced
+        owner: ${var.suffix}
+
+  jobs:
+    account_summary_refresh:
+      name: ca-${var.suffix}-bundle-refresh
+      tasks:
+        - task_key: refresh_summary
+          pipeline_task:
+            pipeline_id: ${resources.pipelines.account_summary.id}
+      tags:
+        workshop: ca-advanced
+        owner: ${var.suffix}
+
+targets:
+  dev:
+    mode: development          # names get a "[dev <you>]" prefix and schedules stay paused
+    default: true
+    workspace:
+      root_path: /Workspace/Users/${workspace.current_user.userName}/.bundle/${bundle.name}/dev/${var.suffix}
+  prod:
+    mode: production           # in a real setup: deployed by CI/CD as a service principal, into the prod catalog
+    workspace:
+      root_path: /Workspace/Users/${workspace.current_user.userName}/.bundle/${bundle.name}/prod/${var.suffix}
