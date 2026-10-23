@@ -1,0 +1,23 @@
+bundle:
+  name: ca-workshop-dev
+
+resources:
+  pipelines:
+    bronze_silver_gold:
+      name: ca-medallion-pipeline-dev
+      clusters:
+        - job_cluster_key: default_cluster
+      target: bronze_silver_gold
+      
+  jobs:
+    data_refresh:
+      name: ca-refresh-job-dev
+      tasks:
+        - task_key: run_pipeline
+          pipeline_task:
+            pipeline_id: ${var.pipeline_id}
+
+variables:
+  catalog:
+    description: Target catalog for this environment
+    default: dev_catalog
